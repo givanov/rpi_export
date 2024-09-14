@@ -8,6 +8,6 @@ FROM arm64v8/alpine as release
 
 COPY --from=build /build/rpi_exporter /rpi_exporter
 
-EXPOSE 9110
+EXPOSE 9090
 
-CMD ["sh", "-c", "/rpi_exporter -addr=:9110"]
+CMD ["sh", "-c", "/rpi_exporter -addr=:9090"]
