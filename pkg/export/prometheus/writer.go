@@ -11,9 +11,8 @@ package prometheus
 
 import (
 	"fmt"
-	"io"
-
 	"github.com/cavaliercoder/rpi_export/pkg/mbox"
+	"io"
 )
 
 const (
@@ -121,23 +120,27 @@ func (w *expWriter) write() error {
 	w.writeHeader("rpi_vc_revision", "Firmware revision of the VideoCore device.", metricTypeGauge)
 	rev, err := m.GetFirmwareRevision()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get firmware revision: %v", err)
 	}
 	w.writeSample(rev)
-
-	w.writeHeader("rpi_board_model", "Board model.", metricTypeGauge)
-	model, err := m.GetBoardModel()
-	if err != nil {
-		return err
-	}
-	w.writeSample(model)
 
 	w.writeHeader("rpi_board_revision", "Board revision.", metricTypeGauge)
 	rev, err = m.GetBoardRevision()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get board revision: %v", err)
 	}
 	w.writeSample(rev)
+
+	// Extract board model from a revision number.
+	// Revision 17 and later is Raspberry Pi 5 that does not have a board model.
+	if (rev>>4)&0xff < 17 {
+		w.writeHeader("rpi_board_model", "Board model.", metricTypeGauge)
+		model, err := m.GetBoardModel()
+		if err != nil {
+			return fmt.Errorf("failed to get board model: %v", err)
+		}
+		w.writeSample(model)
+	}
 
 	/*
 	 * Power.

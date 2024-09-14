@@ -193,7 +193,7 @@ func (m *Mailbox) Do(tagID uint32, bufferBytes int, args ...uint32) ([]Tag, erro
 	// Send message via ioctl
 	err := ioctl.Ioctl(m.f.Fd(), uintptr(mbIoctl), uintptr(unsafe.Pointer(&m.buf[0])))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("vcio: ioctl error: %v", err)
 	}
 
 	debugf("RX:\n")
@@ -283,8 +283,8 @@ const (
 	PowerDeviceIDSPI    PowerDeviceID = 0x00000007
 	PowerDeviceIDCCP2TX PowerDeviceID = 0x00000008
 
-// PowerDeviceIDUnknown (RPi4) PowerDeviceID = 0x00000009
-// PowerDeviceIDUnknown (RPi4) PowerDeviceID = 0x0000000a
+	// PowerDeviceIDUnknown (RPi4) PowerDeviceID = 0x00000009
+	// PowerDeviceIDUnknown (RPi4) PowerDeviceID = 0x0000000a
 )
 
 type PowerState uint32
