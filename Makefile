@@ -115,28 +115,22 @@ fmt:
 	@echo "fmt target..."
 	@gofmt -l -w -s $(SRC)
 
+# Semantic Release
+.PHONY: semantic-release-dependencies
+semantic-release-dependencies:
+	@npm install --save-dev semantic-release
+	@npm install @semantic-release/exec conventional-changelog-conventionalcommits -D
+
 .PHONY: semantic-release
-semantic-release:
+semantic-release: semantic-release-dependencies
 	@npm ci
 	@npx semantic-release
 
 .PHONY: semantic-release-ci
-semantic-release-ci:
+semantic-release-ci: semantic-release-dependencies
 	@npx semantic-release
 
 .PHONY: semantic-release-dry-run
-semantic-release-dry-run:
+semantic-release-dry-run: semantic-release-dependencies
 	@npm ci
 	@npx semantic-release -d
-
-.PHONY: install-npm-check-updates
-install-npm-check-updates:
-	npm install npm-check-updates
-
-.PHONY: update-dependencies
-update-dependencies: install-npm-check-updates
-	ncu -u
-	npm install
-
-export-tag-github-actions:
-	@echo "version=$(VERSION)" >> $${GITHUB_OUTPUT}
