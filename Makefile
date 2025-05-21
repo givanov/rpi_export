@@ -134,3 +134,7 @@ semantic-release-ci: semantic-release-dependencies
 semantic-release-dry-run: semantic-release-dependencies
 	@npm ci
 	@npx semantic-release -d
+
+.PHONY: export-tag-github-actions
+export-tag-github-actions:
+	@echo "version=$(VERSION)" >> $${GITHUB_OUTPUT}
