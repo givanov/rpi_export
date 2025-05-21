@@ -1,0 +1,21 @@
+name: Build and test
+
+on: [pull_request]
+
+jobs:
+  build:
+    name: build and test
+    runs-on: ubuntu-latest
+    env:
+      GOLANG_VERSION: "1.24.3"
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+
+      - name: build and test
+        run: make build

@@ -1,12 +1,16 @@
-FROM arm64v8/golang:1.23-alpine as build
+FROM golang:1.24.3-alpine3.21 as build
 
+ARG TARGETOS
+ARG TARGETARCH
+
+RUN --mount=type=cache,target=/etc/apk/cache apk add --update-cache make
 WORKDIR /build
 COPY . /build
-RUN go build -o . ./...
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} make build
 
-FROM arm64v8/alpine as release
+FROM alpine:3.21 as release
 
-COPY --from=build /build/rpi_exporter /rpi_exporter
+COPY --from=build /build/bin/rpi_exporter /rpi_exporter
 
 EXPOSE 9090
 
