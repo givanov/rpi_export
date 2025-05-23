@@ -10,22 +10,14 @@ LDFLAGS := -extldflags "-static"
 
 BUILD_PATH = github.com/givanov/rpi_export
 
-GOLANGCI_LINT_VERSION := v1.37.1
-
 GOOS ?= linux
 GOARCH ?= arm64
 
-HAS_GOX := $(shell command -v gox;)
-HAS_GO_IMPORTS := $(shell command -v goimports;)
-HAS_GO_MOCKGEN := $(shell command -v mockgen;)
-HAS_GOLANGCI_LINT := $(shell command -v golangci-lint;)
-GOLANGCI_VERSION_CHECK := $(shell golangci-lint --version | grep -oh $(GOLANGCI_LINT_VERSION);)
-HAS_GO_BIN := $(shell command -v gobin;)
-HAS_GCI := $(shell command -v gci;)
-HAS_GO_FUMPT := $(shell command -v gofumpt;)
+HAS_GIT := $(shell command -v git;)
 
 SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
+ifdef HAS_GIT
 GIT_SHORT_COMMIT := $(shell git rev-parse --short HEAD)
 GIT_TAG    := $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
 GIT_DIRTY  = $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "clean")
@@ -43,6 +35,8 @@ endif
 endif
 else
   BINARY_VERSION = $(VERSION)
+endif
+
 endif
 
 VERSION ?= $(TMP_VERSION)
@@ -71,7 +65,7 @@ info:
 
 build: clean-bin info bootstrap generate tidy fmt 
 	@echo "build target..."
-	@CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $(BINDIR)/$(APP_NAME) -ldflags '$(LDFLAGS)' ./cmd/rpi_exporter/main.go
+	@CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $(BINDIR)/$(APP_NAME) -ldflags '$(LDFLAGS)' ./main.go
 
 
 .PHONY: clean-bin
