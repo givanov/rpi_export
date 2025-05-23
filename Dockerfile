@@ -14,4 +14,4 @@ COPY --from=build /build/bin/rpi_exporter /rpi_exporter
 
 EXPOSE 9090
 
-CMD ["sh", "-c", "/rpi_exporter", "-addr", ":9090"]
+CMD ["sh", "-c", "/rpi_exporter"]
