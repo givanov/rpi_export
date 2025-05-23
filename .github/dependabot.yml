@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "bot"
+    open-pull-requests-limit: 10
+    groups:
+      goDependencies:
+        patterns:
+          - "*"

@@ -35,7 +35,7 @@ $ make install
 Description=Raspberry Pi Exporter
 
 [Service]
-ExecStart=/opt/node_exporter/rpi_exporter -addr=:9110
+ExecStart=/opt/node_exporter/rpi_exporter
 
 [Install]
 WantedBy=multi-user.target
@@ -55,9 +55,19 @@ scrape_configs:
   - job_name: "rpi_exporter"
     scrape_interval: 5s
     static_configs:
-      - targets: ["localhost:9110"]
+      - targets: ["localhost:9090"]
 ```
 
 ```shell
 $ sudo systemctl restart prometheus.service
+```
+
+## Running in a kubernetes cluster
+
+```shell
+helm repo add givanov https://givanov.github.io/helm-charts
+helm repo update
+helm install rpi-export givanov/rpi-export
+
+
 ```
