@@ -12,6 +12,7 @@ package mbox
 import (
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"os"
 	"unsafe"
 
@@ -252,7 +253,7 @@ func debugf(format string, a ...interface{}) {
 	if !Debug {
 		return
 	}
-	fmt.Fprintf(os.Stderr, format, a...)
+	zap.L().Info("DEBUG: " + fmt.Sprintf(format, a...))
 }
 
 // GetFirmwareRevision returns the firmware revision of the VideoCore component.

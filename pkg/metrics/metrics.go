@@ -1,9 +1,10 @@
 package metrics
 
 import (
+	"github.com/givanov/rpi_export/pkg/config"
 	"github.com/givanov/rpi_export/pkg/mbox"
 	"github.com/prometheus/client_golang/prometheus"
-	"os"
+	"go.uber.org/zap"
 )
 
 type RaspberryPiMboxCollector struct {
@@ -21,11 +22,9 @@ type RaspberryPiMboxCollector struct {
 	voltageMinMetric          *prometheus.Desc
 }
 
-func NewRaspberryPiMboxCollector() *RaspberryPiMboxCollector {
-	h, _ := os.Hostname()
-
+func NewRaspberryPiMboxCollector(cfg *config.Config) *RaspberryPiMboxCollector {
 	constLabels := prometheus.Labels{
-		"host": h,
+		"host": cfg.HostNameOverride,
 	}
 	return &RaspberryPiMboxCollector{
 		vcRevisionMetric: prometheus.NewDesc("rpi_vc_revision",
@@ -106,16 +105,16 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 	 */
 	rev, err := m.GetFirmwareRevision()
 	if err != nil {
+		zap.L().Error("Error getting firmware revision", zap.Error(err))
 		return
-		//return fmt.Errorf("failed to get firmware revision: %v", err)
 	}
 	fwRevMetric := prometheus.MustNewConstMetric(collector.vcRevisionMetric, prometheus.GaugeValue, float64(rev))
 	ch <- fwRevMetric
 
 	rev, err = m.GetBoardRevision()
 	if err != nil {
+		zap.L().Error("Error getting board revision", zap.Error(err))
 		return
-		//return fmt.Errorf("failed to get board revision: %v", err)
 	}
 	boardRevMetric := prometheus.MustNewConstMetric(collector.boardVersionMetric, prometheus.GaugeValue, float64(rev))
 	ch <- boardRevMetric
@@ -125,8 +124,8 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 	if (rev>>4)&0xff < 17 {
 		model, err := m.GetBoardModel()
 		if err != nil {
+			zap.L().Error("Error getting board model", zap.Error(err))
 			return
-			//return fmt.Errorf("failed to get board model: %v", err)
 		}
 		boardModelMetric := prometheus.MustNewConstMetric(collector.boardModelMetric, prometheus.GaugeValue, float64(model))
 		ch <- boardModelMetric
@@ -138,8 +137,8 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 	for id, label := range powerLabelsByID {
 		powerState, err := m.GetPowerState(id)
 		if err != nil {
+			zap.L().Error("Error getting power state", zap.Error(err))
 			return
-			//return err
 		}
 		boardPowerStateMetric := prometheus.MustNewConstMetric(collector.powerStateMetric, prometheus.GaugeValue, float64(powerState), label)
 		ch <- boardPowerStateMetric
@@ -151,8 +150,8 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 	for id, label := range clockLabelsByID {
 		clockRate, err := m.GetClockRate(id)
 		if err != nil {
+			zap.L().Error("Error getting clock rate", zap.Error(err))
 			return
-			//return err
 		}
 		clockRateMetric := prometheus.MustNewConstMetric(collector.clockRateHzMetric, prometheus.GaugeValue, float64(clockRate), label)
 		ch <- clockRateMetric
@@ -161,8 +160,8 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 	for id, label := range clockLabelsByID {
 		clockRate, err := m.GetClockRateMeasured(id)
 		if err != nil {
+			zap.L().Error("Error getting clock rate measured", zap.Error(err))
 			return
-			//return err
 		}
 		clockRateMeasuredMetric := prometheus.MustNewConstMetric(collector.clockRateMeasuredHzMetric, prometheus.GaugeValue, float64(clockRate), label)
 		ch <- clockRateMeasuredMetric
@@ -170,8 +169,8 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 
 	turbo, err := m.GetTurbo()
 	if err != nil {
+		zap.L().Error("Error getting turbo", zap.Error(err))
 		return
-		//return err
 	}
 	turboVal := float64(0)
 	if turbo {
@@ -188,16 +187,16 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 	// Current SoC temperature
 	temp, err := m.GetTemperature()
 	if err != nil {
+		zap.L().Error("Error getting temperature", zap.Error(err))
 		return
-		//return err
 	}
 	temperatureCMetric := prometheus.MustNewConstMetric(collector.temperatureCMetric, prometheus.GaugeValue, float64(temp), "soc")
 	ch <- temperatureCMetric
 
 	maxTemp, err := m.GetMaxTemperature()
 	if err != nil {
+		zap.L().Error("Error getting max temperature", zap.Error(err))
 		return
-		//return err
 	}
 
 	// Max SoC temperature
@@ -212,8 +211,8 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 	for id, label := range voltageLabelsByID {
 		volts, err := m.GetVoltage(id)
 		if err != nil {
+			zap.L().Error("Error getting voltage", zap.Error(err))
 			return
-			//return err
 		}
 		voltageMetric := prometheus.MustNewConstMetric(collector.voltageMetric, prometheus.GaugeValue, float64(volts), label)
 		ch <- voltageMetric
@@ -222,8 +221,8 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 	for id, label := range voltageLabelsByID {
 		volts, err := m.GetMinVoltage(id)
 		if err != nil {
+			zap.L().Error("Error getting voltage", zap.Error(err))
 			return
-			//return err
 		}
 		voltageMinMetric := prometheus.MustNewConstMetric(collector.voltageMinMetric, prometheus.GaugeValue, float64(volts), label)
 		ch <- voltageMinMetric
@@ -232,8 +231,8 @@ func (collector *RaspberryPiMboxCollector) Collect(ch chan<- prometheus.Metric) 
 	for id, label := range voltageLabelsByID {
 		volts, err := m.GetMaxVoltage(id)
 		if err != nil {
+			zap.L().Error("Error getting voltage", zap.Error(err))
 			return
-			//return err
 		}
 		voltageMaxMetric := prometheus.MustNewConstMetric(collector.voltageMaxMetric, prometheus.GaugeValue, float64(volts), label)
 		ch <- voltageMaxMetric
